@@ -4,6 +4,7 @@ import org.example.userauthenticationservice_july2024.dtos.LoginRequestDto;
 import org.example.userauthenticationservice_july2024.dtos.LogoutRequestDto;
 import org.example.userauthenticationservice_july2024.dtos.SignupRequestDto;
 import org.example.userauthenticationservice_july2024.dtos.UserDto;
+import org.example.userauthenticationservice_july2024.exceptions.UserAlreadyExistsException;
 import org.example.userauthenticationservice_july2024.models.User;
 import org.example.userauthenticationservice_july2024.services.IAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,23 +25,27 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<UserDto> signup(@RequestBody SignupRequestDto signupRequestDto) {
-         if(signupRequestDto.getEmail() == null || signupRequestDto.getPassword() == null) {
-             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-         }
+        if(signupRequestDto.getEmail() == null || signupRequestDto.getPassword() == null) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
 
-         User user = authService.signup(signupRequestDto.getEmail(),signupRequestDto.getPassword());
-         return new ResponseEntity<>(from(user), HttpStatus.CREATED);
+        try {
+            User user = authService.signup(signupRequestDto.getEmail(), signupRequestDto.getPassword());
+            return new ResponseEntity<>(from(user), HttpStatus.CREATED);
+        }catch (UserAlreadyExistsException existsException) {
+            throw new RuntimeException(existsException.getMessage());
+        }
     }
 
     @PostMapping("/login")
     public ResponseEntity<UserDto> login(@RequestBody LoginRequestDto loginRequestDto) {
-       User user = authService.login(loginRequestDto.getEmail(), loginRequestDto.getPassword());
-       return new ResponseEntity<>(from(user),HttpStatus.OK);
+        User user = authService.login(loginRequestDto.getEmail(), loginRequestDto.getPassword());
+        return new ResponseEntity<>(from(user),HttpStatus.OK);
     }
 
     @PostMapping("/logout")
     public ResponseEntity<UserDto> logout(@RequestBody LogoutRequestDto logoutRequestDto) {
-       //Learners need to implement after 6 sept
+        //Learners need to implement after 6 sept
         return null;
     }
 
