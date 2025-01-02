@@ -61,8 +61,16 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<UserDto> logout(@RequestBody LogoutRequestDto logoutRequestDto) {
-       //Learners need to implement after 6 sept
-        return null;
+        try {
+            User user = authService.logout(logoutRequestDto.getEmail());
+            if (user == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            UserDto userDto = userMapper.toDto(user);
+            return new ResponseEntity<>(userDto, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     private UserDto from(User user) {

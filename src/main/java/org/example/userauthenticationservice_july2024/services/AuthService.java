@@ -68,6 +68,7 @@ public class AuthService implements IAuthService {
 //
 //            byte[] content = message.getBytes(StandardCharsets.UTF_8);
 
+
             Map<String,Object> claims =new HashMap<>();
             claims.put("user_id__",user.getId());
             //claims.put("user_email",user.getEmail());
@@ -95,6 +96,15 @@ public class AuthService implements IAuthService {
 
     @Override
     public User logout(String email) {
+        Optional<User> userOptional = userRepo.findUserByEmail(email);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            // Invalidate the user's session or token here
+            // For example, you can set the user's state to INACTIVE
+            user.setState(State.INACTIVE);
+            userRepo.save(user);
+            return user;
+        }
         return null;
     }
 }
