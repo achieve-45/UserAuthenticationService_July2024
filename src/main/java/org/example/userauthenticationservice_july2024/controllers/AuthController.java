@@ -1,10 +1,7 @@
 package org.example.userauthenticationservice_july2024.controllers;
 
 import org.antlr.v4.runtime.misc.Pair;
-import org.example.userauthenticationservice_july2024.dtos.LoginRequestDto;
-import org.example.userauthenticationservice_july2024.dtos.LogoutRequestDto;
-import org.example.userauthenticationservice_july2024.dtos.SignupRequestDto;
-import org.example.userauthenticationservice_july2024.dtos.UserDto;
+import org.example.userauthenticationservice_july2024.dtos.*;
 import org.example.userauthenticationservice_july2024.exceptions.InvalidCredentialsException;
 import org.example.userauthenticationservice_july2024.exceptions.UserAlreadyExistsException;
 import org.example.userauthenticationservice_july2024.mappers.UserMapper;
@@ -32,17 +29,17 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<UserDto> signup(@RequestBody SignupRequestDto signupRequestDto) {
-         if(signupRequestDto.getEmail() == null || signupRequestDto.getPassword() == null) {
-             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-         }
+        if(signupRequestDto.getEmail() == null || signupRequestDto.getPassword() == null) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
 
-         try {
-             User user = authService.signup(signupRequestDto.getEmail(), signupRequestDto.getPassword());
-             UserDto userDto = userMapper.toDto(user);
-             return new ResponseEntity<>(userDto, HttpStatus.CREATED);
-         }catch (UserAlreadyExistsException existsException) {
-             throw new RuntimeException(existsException.getMessage());
-         }
+        try {
+            User user = authService.signup(signupRequestDto.getEmail(), signupRequestDto.getPassword());
+            UserDto userDto = userMapper.toDto(user);
+            return new ResponseEntity<>(userDto, HttpStatus.CREATED);
+        }catch (UserAlreadyExistsException existsException) {
+            throw new RuntimeException(existsException.getMessage());
+        }
     }
 
     @PostMapping("/login")
@@ -71,6 +68,15 @@ public class AuthController {
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @PostMapping("/validateToken")
+    public Boolean validateToken(@RequestBody ValidateTokenDto validateTokenDto) {
+        Boolean result = authService.validateToken(validateTokenDto.getToken(), validateTokenDto.getUserId());
+        if(!result) {
+            throw new RuntimeException("Please login again");
+        }
+        return result;
     }
 
     private UserDto from(User user) {
